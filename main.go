@@ -1,10 +1,11 @@
 package main
 
 import (
+	_healthHttpDirectory "frieda-golang-training-beginner/health/directory/http"
+	_healthUseCase "frieda-golang-training-beginner/health/usecase"
 	_helloWorldHttpDirectory "frieda-golang-training-beginner/hello-world/directory/http"
 	_helloWorldUseCase "frieda-golang-training-beginner/hello-world/usecase"
-	_healthUseCase "frieda-golang-training-beginner/health/usecase"
-	_healthHttpDirectory "frieda-golang-training-beginner/health/directory/http"
+
 	"github.com/labstack/echo"
 	"github.com/labstack/gommon/log"
 )
