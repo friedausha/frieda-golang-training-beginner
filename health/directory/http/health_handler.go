@@ -6,11 +6,15 @@ import (
 	"net/http"
 )
 
-type HealthHandler struct {
-	healthUsecase domain.HealthUsecase
+type HealthUsecase interface {
+	Get() domain.HealthResponsePayload
 }
 
-func NewHealthHandler(e *echo.Echo, us domain.HealthUsecase) {
+type HealthHandler struct {
+	healthUsecase HealthUsecase
+}
+
+func NewHealthHandler(e *echo.Echo, us HealthUsecase) {
 	handler := &HealthHandler{
 		healthUsecase: us,
 	}

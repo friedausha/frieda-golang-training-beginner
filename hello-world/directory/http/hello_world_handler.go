@@ -6,12 +6,12 @@ import (
 	"net/http"
 )
 
-type ResponseError struct {
-	Message string `json:"message"`
+type usecase interface {
+	Get() domain.HelloWorldResponsePayload
 }
 
 type HelloWorldHandler struct {
-	helloWorldUCase domain.HelloWorldUsecase
+	helloWorldUCase usecase
 }
 
 func NewHelloWorldHandler(e *echo.Echo, us domain.HelloWorldUsecase) {

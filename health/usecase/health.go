@@ -7,9 +7,5 @@ import (
 type healthUsecase struct{}
 
 func (h healthUsecase) Get() domain.HealthResponsePayload {
-	return domain.HealthResponsePayload{Status: "HEALTHY"}
-}
-
-func NewHealthUsecase() domain.HealthUsecase {
-	return &healthUsecase{}
+	return domain.HealthResponsePayload{Status: "healthy"}
 }
