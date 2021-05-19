@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"frieda-golang-training-beginner/domain"
 	"frieda-golang-training-beginner/payment_code/repository"
 	"github.com/jinzhu/copier"
@@ -28,7 +27,6 @@ func (p PaymentCodeUsecase) Get(ctx context.Context, uuid string) (domain.GetPay
 
 	err = copier.Copy(&res, &paymentCode)
 	if err != nil {
-		fmt.Println("error disini", paymentCode)
 		return domain.GetPaymentCodeResponsePayload{}, err
 	}
 

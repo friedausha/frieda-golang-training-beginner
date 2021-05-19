@@ -7,5 +7,5 @@ import (
 type HelloWorldUsecase struct {}
 
 func (h HelloWorldUsecase) Get() domain.HelloWorldResponsePayload {
-	return domain.HelloWorldResponsePayload{Message: "hello-world!"}
+	return domain.HelloWorldResponsePayload{Message: "hello world"}
 }

@@ -2,7 +2,6 @@ package http
 
 import (
 	"context"
-	"fmt"
 	"frieda-golang-training-beginner/domain"
 	"github.com/labstack/echo"
 	"net/http"
@@ -33,8 +32,7 @@ func (h *PaymentCodeHandler) GetPaymentCode(c echo.Context) error {
 	idP := c.Param("id")
 	res, err := h.paymentCodeUsecase.Get(c.Request().Context(), idP)
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusBadRequest, "error getting payment code")
+		return c.JSON(http.StatusNotFound, "can not get payment code")
 	}
 	return c.JSON(http.StatusOK, res)
 }
@@ -44,6 +42,9 @@ func (h *PaymentCodeHandler) CreatePaymentCode(c echo.Context) error {
 	err := c.Bind(&paymentCode)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+	if paymentCode.Name == "" || paymentCode.PaymentCode == "" {
+		return c.JSON(http.StatusBadRequest, "missing value")
 	}
 	res, err := h.paymentCodeUsecase.Create(c.Request().Context(), paymentCode)
 	if err != nil {
