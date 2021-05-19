@@ -6,15 +6,15 @@ import (
 	"net/http"
 )
 
-type usecase interface {
+type IHelloWorldUseCase interface {
 	Get() domain.HelloWorldResponsePayload
 }
 
 type HelloWorldHandler struct {
-	helloWorldUCase usecase
+	helloWorldUCase IHelloWorldUseCase
 }
 
-func NewHelloWorldHandler(e *echo.Echo, us domain.HelloWorldUsecase) {
+func NewHelloWorldHandler(e *echo.Echo, us IHelloWorldUseCase) {
 	handler := &HelloWorldHandler{
 		helloWorldUCase: us,
 	}

@@ -6,14 +6,13 @@ import (
 	"fmt"
 	"frieda-golang-training-beginner/domain"
 	"github.com/google/uuid"
-	"time"
 )
 
-type paymentCodeRepository struct {
+type PaymentCodeRepository struct {
 	Conn *sql.DB
 }
 
-func (m *paymentCodeRepository) fetch(ctx context.Context, query string, args ...interface{}) (result []domain.PaymentCode, err error) {
+func (m *PaymentCodeRepository) fetch(ctx context.Context, query string, args ...interface{}) (result []domain.PaymentCode, err error) {
 	rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
@@ -49,9 +48,9 @@ func (m *paymentCodeRepository) fetch(ctx context.Context, query string, args ..
 	return result, nil
 }
 
-func (p paymentCodeRepository) GetByID(ctx context.Context, uuid uuid.UUID) (domain.PaymentCode, error) {
+func (p PaymentCodeRepository) GetByID(ctx context.Context, uuid string) (domain.PaymentCode, error) {
 	query := `SELECT id, payment_code, name, status, expiration_date, created_at, updated_at
-  						FROM payment_codes WHERE ID = ?`
+  						FROM payment_codes WHERE id = $1`
 
 	list, err := p.fetch(ctx, query, uuid)
 	if err != nil {
@@ -66,25 +65,24 @@ func (p paymentCodeRepository) GetByID(ctx context.Context, uuid uuid.UUID) (dom
 	}
 }
 
-func (p paymentCodeRepository) Create(ctx context.Context, paymentCode *domain.PaymentCode) error {
+func (p PaymentCodeRepository) Create(ctx context.Context, paymentCode *domain.PaymentCode) error {
 	paymentCode.ID = uuid.New()
-	if paymentCode.ExpirationDate.IsZero() {
-		paymentCode.ExpirationDate = time.Now().AddDate(51, 0, 0).UTC()
-	}
-	query := `INSERT INTO payment_codes SET id=? , payment_code=? , name=?, status=?, expiration_date=?`
+	query := `INSERT INTO payment_codes (id, payment_code, name, status, expiration_date) 
+				VALUES ($1 , $2 , $3, $4, $5)`
 	stmt, err := p.Conn.PrepareContext(ctx, query)
-	if err != nil {
-		return nil
-	}
-
-	_, err = stmt.ExecContext(ctx, paymentCode.ID, paymentCode.PaymentCode, paymentCode.Name, paymentCode.ExpirationDate)
 	if err != nil {
 		return err
 	}
+
+	_, err = stmt.ExecContext(ctx, paymentCode.ID, paymentCode.PaymentCode, paymentCode.Name, paymentCode.Status, paymentCode.ExpirationDate)
+	if err != nil {
+		return err
+	}
+
 	return nil
 
 }
 
-func NewPaymentCodeRepository(Conn *sql.DB) domain.PaymentCodeRepository {
-	return &paymentCodeRepository{Conn}
+func NewPaymentCodeRepository(Conn *sql.DB) *PaymentCodeRepository {
+	return &PaymentCodeRepository{Conn}
 }

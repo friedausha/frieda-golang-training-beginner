@@ -1,8 +1,9 @@
 package http
 
 import (
+	"context"
+	"fmt"
 	"frieda-golang-training-beginner/domain"
-	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"net/http"
 )
@@ -11,11 +12,16 @@ type ResponseError struct {
 	Message string `json:"message"`
 }
 
-type PaymentCodeHandler struct {
-	paymentCodeUsecase domain.PaymentCodeUsecase
+type IPaymentCodeUsecase interface {
+	Get(ctx context.Context, uuid string) (domain.GetPaymentCodeResponsePayload, error)
+	Create(ctx context.Context, request domain.CreatePaymentCodeRequestPayload) (domain.PaymentCode, error)
 }
 
-func NewPaymentCodeHandler(e *echo.Echo, us domain.PaymentCodeUsecase) {
+type PaymentCodeHandler struct {
+	paymentCodeUsecase IPaymentCodeUsecase
+}
+
+func NewPaymentCodeHandler(e *echo.Echo, us IPaymentCodeUsecase) {
 	handler := &PaymentCodeHandler{
 		paymentCodeUsecase: us,
 	}
@@ -24,11 +30,12 @@ func NewPaymentCodeHandler(e *echo.Echo, us domain.PaymentCodeUsecase) {
 }
 
 func (h *PaymentCodeHandler) GetPaymentCode(c echo.Context) error {
-	idP, err := uuid.FromBytes([]byte(c.Param("id")))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "error converting id")
-	}
+	idP := c.Param("id")
 	res, err := h.paymentCodeUsecase.Get(c.Request().Context(), idP)
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusBadRequest, "error getting payment code")
+	}
 	return c.JSON(http.StatusOK, res)
 }
 

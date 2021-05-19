@@ -2,51 +2,62 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"frieda-golang-training-beginner/domain"
-	"github.com/google/uuid"
+	"frieda-golang-training-beginner/payment_code/repository"
 	"github.com/jinzhu/copier"
 	"time"
 )
 
-type paymentCodeUsecase struct {
-	paymentCodeRepo domain.PaymentCodeRepository
-	contextTimeout  time.Duration
+type IPaymentCodeRepository interface {
+	GetByID(ctx context.Context, uuid string) (domain.PaymentCode, error)
+	Create(ctx context.Context, paymentCode *domain.PaymentCode) error
 }
 
-func (p paymentCodeUsecase) Get(ctx context.Context, uuid uuid.UUID) (domain.GetPaymentCodeResponsePayload, error) {
+type PaymentCodeUsecase struct {
+	PaymentCodeRepo repository.PaymentCodeRepository
+	ContextTimeout  time.Duration
+}
+
+func (p PaymentCodeUsecase) Get(ctx context.Context, uuid string) (domain.GetPaymentCodeResponsePayload, error) {
 	var res domain.GetPaymentCodeResponsePayload
-	paymentCode, err := p.paymentCodeRepo.GetByID(ctx, uuid)
+	paymentCode, err := p.PaymentCodeRepo.GetByID(ctx, uuid)
 	if err != nil {
 		return domain.GetPaymentCodeResponsePayload{}, err
 	}
 
 	err = copier.Copy(&res, &paymentCode)
 	if err != nil {
+		fmt.Println("error disini", paymentCode)
 		return domain.GetPaymentCodeResponsePayload{}, err
 	}
 
 	return res, nil
 }
 
-func (p paymentCodeUsecase) Create(ctx context.Context, request domain.CreatePaymentCodeRequestPayload) (domain.CreatePaymentCodeResponsePayload, error) {
-	var paymentCode *domain.PaymentCode
-	var resp domain.CreatePaymentCodeResponsePayload
-	err := copier.Copy(request, paymentCode)
-	if err != nil {
-		return domain.CreatePaymentCodeResponsePayload{}, err
+func (p PaymentCodeUsecase) Create(ctx context.Context, request domain.CreatePaymentCodeRequestPayload) (domain.PaymentCode, error) {
+	var paymentCode domain.PaymentCode
+	var err error
+
+	paymentCode.PaymentCode = request.PaymentCode
+	paymentCode.Name = request.Name
+	paymentCode.Status = request.Status
+	if request.ExpirationDateString == "" {
+		paymentCode.ExpirationDate = time.Now().AddDate(51, 0, 0).UTC()
+	} else {
+		paymentCode.ExpirationDate, err = time.Parse(time.RFC3339, request.ExpirationDateString)
 	}
 
-	err = p.paymentCodeRepo.Create(ctx, paymentCode)
-	err = copier.Copy(&paymentCode, &resp)
+	err = p.PaymentCodeRepo.Create(ctx, &paymentCode)
 	if err != nil {
-		return domain.CreatePaymentCodeResponsePayload{}, err
+		return domain.PaymentCode{}, err
 	}
-	return resp, nil
+	return paymentCode, nil
 }
 
-func NewPaymentCodeUsecase(p domain.PaymentCodeRepository, timeout time.Duration) domain.PaymentCodeUsecase {
-	return &paymentCodeUsecase{
-		paymentCodeRepo: p,
-		contextTimeout:  timeout,
+func NewPaymentCodeUsecase(p repository.PaymentCodeRepository, timeout time.Duration) PaymentCodeUsecase {
+	return PaymentCodeUsecase{
+		PaymentCodeRepo: p,
+		ContextTimeout:  timeout,
 	}
 }

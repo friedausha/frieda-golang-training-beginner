@@ -3,40 +3,44 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_healthHttpDirectory "frieda-golang-training-beginner/health/directory/http"
-	_healthUseCase "frieda-golang-training-beginner/health/usecase"
-	_helloWorldHttpDirectory "frieda-golang-training-beginner/hello-world/directory/http"
-	_helloWorldUseCase "frieda-golang-training-beginner/hello-world/usecase"
-	"frieda-golang-training-beginner/payment_code/directory/http"
-	"frieda-golang-training-beginner/payment_code/repository"
-	"frieda-golang-training-beginner/payment_code/usecase"
-	"github.com/labstack/echo"
+	_healthUsecase "frieda-golang-training-beginner/health/usecase"
+	_helloWorldUsecase "frieda-golang-training-beginner/hello-world/usecase"
 	"github.com/labstack/gommon/log"
+
+	_healthHttpDirectory "frieda-golang-training-beginner/health/directory/http"
+	_helloWorldHttpDirectory "frieda-golang-training-beginner/hello-world/directory/http"
+	_paymentCodeHttpDirectory "frieda-golang-training-beginner/payment_code/directory/http"
+	"frieda-golang-training-beginner/payment_code/repository"
+	_paymentCodeUsecase "frieda-golang-training-beginner/payment_code/usecase"
+	"github.com/labstack/echo"
+	_ "github.com/lib/pq"
 	"time"
 )
 
 const (
 	host     = "localhost"
 	port     = 5432
-	user     = "postgres"
-	password = "password"
+	user     = "frieda"
+	password = "namamu"
 	dbname   = "golang_training"
 )
 
 func main() {
 	e := echo.New()
 
-	helloWorldUsecase := _helloWorldUseCase.NewHelloWorldUsecase()
+	helloWorldUsecase := _helloWorldUsecase.HelloWorldUsecase{}
 	_helloWorldHttpDirectory.NewHelloWorldHandler(e, helloWorldUsecase)
 
-	healthUsecase := _healthUseCase.NewHealthUsecase()
+	healthUsecase := _healthUsecase.HealthUsecase{}
 	_healthHttpDirectory.NewHealthHandler(e, healthUsecase)
-	log.Fatal(e.Start("localhost:9090"))
 
 	db := initDB()
-	paymentCodeRepository := repository.NewPaymentCodeRepository(db)
-	paymentCodeUseCase := usecase.NewPaymentCodeUsecase(paymentCodeRepository, time.Duration(10000000))
-	http.NewPaymentCodeHandler(e, paymentCodeUseCase)
+	//paymentCodeRepository := repository.NewPaymentCodeRepository(db)
+	paymentCodeRepository := repository.PaymentCodeRepository{Conn: db}
+	paymentCodeUsecase := _paymentCodeUsecase.PaymentCodeUsecase{PaymentCodeRepo: paymentCodeRepository, ContextTimeout: time.Duration(100000000) }
+	_paymentCodeHttpDirectory.NewPaymentCodeHandler(e, paymentCodeUsecase)
+
+	log.Fatal(e.Start("localhost:9090"))
 
 }
 
@@ -49,7 +53,6 @@ func initDB() *sql.DB {
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
 	err = db.Ping()
 	if err != nil {
 		panic(err)

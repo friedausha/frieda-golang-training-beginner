@@ -4,12 +4,8 @@ import (
 	"frieda-golang-training-beginner/domain"
 )
 
-type helloworldUsecase struct{}
+type HelloWorldUsecase struct {}
 
-func (h helloworldUsecase) Get() domain.HelloWorldResponsePayload {
-	return domain.HelloWorldResponsePayload{Message: "Hello, world!"}
-}
-
-func NewHelloWorldUsecase() domain.HelloWorldUsecase {
-	return &helloworldUsecase{}
+func (h HelloWorldUsecase) Get() domain.HelloWorldResponsePayload {
+	return domain.HelloWorldResponsePayload{Message: "hello-world!"}
 }

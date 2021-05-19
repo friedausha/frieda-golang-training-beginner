@@ -4,8 +4,10 @@ import (
 	"frieda-golang-training-beginner/domain"
 )
 
-type healthUsecase struct{}
+type HealthUsecase struct{}
 
-func (h healthUsecase) Get() domain.HealthResponsePayload {
+func (h HealthUsecase) Get() domain.HealthResponsePayload {
 	return domain.HealthResponsePayload{Status: "healthy"}
 }
+
+
