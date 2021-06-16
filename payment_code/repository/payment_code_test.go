@@ -5,21 +5,44 @@ import (
 	"frieda-golang-training-beginner/domain"
 	"frieda-golang-training-beginner/payment_code/repository"
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/suite"
+	"os"
 	"testing"
 	"time"
 )
 
-type paymentStatementTestSuite struct {
+type paymentCodeTestSuite struct {
 	repository.Suite
 }
 
-func (s paymentStatementTestSuite) BeforeTest(suiteName, testName string) {
+
+func TestSuitePaymentCode(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skip the Test Suite")
+	}
+
+	dsn := os.Getenv("POSTGRES_TEST_URL")
+	if dsn == "" {
+		dsn = repository.DefaultTestDsn
+	}
+
+	paymentCodeSuite := &paymentCodeTestSuite{
+		repository.Suite{
+			DSN:                     dsn,
+			MigrationLocationFolder: "migrations",
+		},
+	}
+
+	suite.Run(t, paymentCodeSuite)
+}
+
+func (s paymentCodeTestSuite) BeforeTest(suiteName, testName string) {
 	ok, err := s.Migration.Up()
 	s.Require().NoError(err)
 	s.Require().True(ok)
 }
 
-func (s paymentStatementTestSuite) AfterTest(suiteName, testName string) {
+func (s paymentCodeTestSuite) AfterTest(suiteName, testName string) {
 	ok, err := s.Migration.Down()
 	s.Require().NoError(err)
 	s.Require().True(ok)
@@ -34,7 +57,7 @@ func createMockPaymentCodes() *domain.PaymentCode {
 	}
 }
 
-func (s paymentStatementTestSuite) TestCreatePaymentCodes() {
+func (s paymentCodeTestSuite) TestCreatePaymentCodes() {
 	repo := repository.NewPaymentCodeRepository(s.DBConn)
 
 	testCases := []struct {
@@ -78,4 +101,47 @@ func (s paymentStatementTestSuite) TestCreatePaymentCodes() {
 			s.Require().Equal(reqBody.Status, inserted.Status)
 		})
 	}
+}
+
+func (s paymentCodeTestSuite) TestGetByID()  {
+	repo := repository.NewPaymentCodeRepository(s.DBConn)
+	paymentCode := createMockPaymentCodes()
+
+	testCases := []struct {
+		desc        string
+		reqBody     string
+		expectedErr error
+		expectedResult *domain.PaymentCode
+	}{
+		{
+			desc:        "success-get-payment-code-by=id",
+			reqBody:     paymentCode.ID.String(),
+			expectedErr: nil,
+			expectedResult: paymentCode,
+		},
+		{
+			desc: "error-payment-code-doesnt-exist",
+			reqBody:     "test-get-nil",
+			expectedErr: nil,
+			expectedResult: nil,
+		},
+	}
+
+	for _, tC := range testCases {
+		s.T().Run(tC.desc, func(t *testing.T) {
+
+			_ = repo.Create(context.TODO(), paymentCode)
+			inserted, err := repo.GetByID(context.TODO(), tC.reqBody)
+			//if tC.expectedErr != nil {
+			//	s.Require().Equal(tC.expectedErr, err)
+			//	return
+			//}
+			s.Require().NoError(err)
+
+			s.Require().Equal(paymentCode.ID, inserted.ID)
+			s.Require().Equal(paymentCode.Name, inserted.Name)
+			s.Require().Equal(paymentCode.Status, inserted.Status)
+		})
+	}
+
 }
