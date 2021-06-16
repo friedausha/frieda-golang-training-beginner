@@ -1,12 +1,12 @@
-package test
+package usecase_test
 
 import (
 	"context"
 	"errors"
 	"frieda-golang-training-beginner/domain"
-	"frieda-golang-training-beginner/mock"
+	mocks"frieda-golang-training-beginner/mock"
 	"frieda-golang-training-beginner/payment_code/usecase"
-	mocks "github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -14,26 +14,26 @@ import (
 func TestCreatePaymentCode(t *testing.T) {
 	testCases := []struct {
 		desc           string
-		mockRepo       mock.IPaymentCodeRepository
+		mockRepo       mocks.IPaymentCodeRepository
 		expectedReturn error
 	}{
 		{
 			desc: "success",
-			mockRepo: func() mock.IPaymentCodeRepository {
-				repo := new(mock.IPaymentCodeRepository)
-				repo.On("Create", mocks.Anything, mocks.Anything).Return(nil).Once()
+			mockRepo: func() mocks.IPaymentCodeRepository {
+				repo := new(mocks.IPaymentCodeRepository)
+				repo.On("Create", mock.Anything, mock.Anything).Return(nil).Once()
 				return *repo
 			}(),
 			expectedReturn: nil,
 		},
 		{
 			desc: "failed",
-			mockRepo: func() mock.IPaymentCodeRepository {
-				repo := new(mock.IPaymentCodeRepository)
-				repo.On("Create", mocks.Anything, mocks.Anything).Return(errors.New("connection timed out")).Once()
+			mockRepo: func() mocks.IPaymentCodeRepository {
+				repo := new(mocks.IPaymentCodeRepository)
+				repo.On("Create", mock.Anything, mock.Anything).Return(errors.New("connection timed out")).Once()
 				return *repo
 			}(),
-			expectedReturn: errors.New("Unknown Error"),
+			expectedReturn: errors.New("connection timed out"),
 		},
 	}
 	for _, tC := range testCases {
