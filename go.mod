@@ -3,16 +3,16 @@ module frieda-golang-training-beginner
 go 1.13
 
 require (
+	github.com/Kount/pq-timeouts v1.0.0
+	github.com/golang-migrate/migrate/v4 v4.7.0
 	github.com/google/uuid v1.2.0
 	github.com/jinzhu/copier v0.3.2
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.3.0
-	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.10.2
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
-	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect

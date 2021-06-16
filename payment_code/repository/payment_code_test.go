@@ -1,0 +1,81 @@
+package repository_test
+
+import (
+	"context"
+	"frieda-golang-training-beginner/domain"
+	"frieda-golang-training-beginner/payment_code/repository"
+	"github.com/google/uuid"
+	"testing"
+	"time"
+)
+
+type paymentStatementTestSuite struct {
+	repository.Suite
+}
+
+func (s paymentStatementTestSuite) BeforeTest(suiteName, testName string) {
+	ok, err := s.Migration.Up()
+	s.Require().NoError(err)
+	s.Require().True(ok)
+}
+
+func (s paymentStatementTestSuite) AfterTest(suiteName, testName string) {
+	ok, err := s.Migration.Down()
+	s.Require().NoError(err)
+	s.Require().True(ok)
+}
+
+
+func createMockPaymentCodes() *domain.PaymentCode {
+	return &domain.PaymentCode{
+		ID: uuid.UUID{},
+		Name: "Test",
+		Status: "ACTIVE",
+	}
+}
+
+func (s paymentStatementTestSuite) TestCreatePaymentCodes() {
+	repo := repository.NewPaymentCodeRepository(s.DBConn)
+
+	testCases := []struct {
+		desc        string
+		ctx         context.Context
+		reqBody     *domain.PaymentCode
+		expectedErr error
+	}{
+		{
+			desc:        "success-create-payment-code",
+			ctx:         context.Background(),
+			reqBody:     createMockPaymentCodes(),
+			expectedErr: nil,
+		},
+		{
+			desc: "error-create-payment-code-context-timeout",
+			ctx: func() context.Context {
+				ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Hour*-1))
+				_ = cancel
+				return ctx
+			}(),
+			reqBody:     createMockPaymentCodes(),
+			expectedErr: context.DeadlineExceeded,
+		},
+	}
+	for _, tC := range testCases {
+		s.T().Run(tC.desc, func(t *testing.T) {
+			err := repo.Create(tC.ctx, tC.reqBody)
+			if tC.expectedErr != nil {
+				s.Require().Equal(tC.expectedErr, err)
+				return
+			}
+			s.Require().NoError(err)
+			s.Require().NotEmpty(tC.reqBody.ID)
+			inserted, err := repo.GetByID(tC.ctx, tC.reqBody.ID.String())
+			s.Require().NoError(err)
+			reqBody := tC.reqBody
+
+			s.Require().Equal(reqBody.ID, inserted.ID)
+			s.Require().Equal(reqBody.Name, inserted.Name)
+			s.Require().Equal(reqBody.Status, inserted.Status)
+		})
+	}
+}

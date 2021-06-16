@@ -21,7 +21,7 @@ func (m *PaymentCodeRepository) fetch(ctx context.Context, query string, args ..
 	defer func() {
 		errRow := rows.Close()
 		if errRow != nil {
-			fmt.Errorf(`error when fetching`, errRow)
+			fmt.Errorf("error when fetching %d", errRow)
 			return
 		}
 	}()
