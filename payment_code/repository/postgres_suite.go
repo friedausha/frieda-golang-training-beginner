@@ -17,7 +17,7 @@ const (
 	postgresDriver  = "pq-timeouts"
 
 	// DefaultTestDsn is the default url for testing postgresql in the postgres test suites
-	DefaultTestDsn = "user=postgres password=password dbname=testing host=localhost port=54320 sslmode=disable read_timeout=60000 write_timeout=60000"
+	DefaultTestDsn = "user=postgres password=password dbname=cp-settings-test host=localhost port=5432 sslmode=disable read_timeout=60000 write_timeout=60000"
 )
 
 // Suite struct for MySQL Suite
