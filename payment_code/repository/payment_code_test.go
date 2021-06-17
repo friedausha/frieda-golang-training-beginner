@@ -132,10 +132,6 @@ func (s paymentCodeTestSuite) TestGetByID()  {
 
 			_ = repo.Create(context.TODO(), paymentCode)
 			inserted, err := repo.GetByID(context.TODO(), tC.reqBody)
-			//if tC.expectedErr != nil {
-			//	s.Require().Equal(tC.expectedErr, err)
-			//	return
-			//}
 			s.Require().NoError(err)
 
 			s.Require().Equal(paymentCode.ID, inserted.ID)
