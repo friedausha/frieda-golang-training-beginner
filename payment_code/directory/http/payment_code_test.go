@@ -58,7 +58,6 @@ func TestCreate(t *testing.T)  {
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)
 			require.Equal(t, tC.statusCodeExpected, rec.Code)
-			tC.svc.AssertExpectations(t)
 		})
 	}
 

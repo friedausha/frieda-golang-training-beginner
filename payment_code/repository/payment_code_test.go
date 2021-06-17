@@ -4,6 +4,7 @@ import (
 	"context"
 	"frieda-golang-training-beginner/domain"
 	"frieda-golang-training-beginner/payment_code/repository"
+	"frieda-golang-training-beginner/util"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"os"
@@ -12,7 +13,7 @@ import (
 )
 
 type paymentCodeTestSuite struct {
-	repository.Suite
+	util.Suite
 }
 
 func TestSuitePaymentCode(t *testing.T) {
@@ -22,11 +23,11 @@ func TestSuitePaymentCode(t *testing.T) {
 
 	dsn := os.Getenv("POSTGRES_TEST_URL")
 	if dsn == "" {
-		dsn = repository.DefaultTestDsn
+		dsn = util.DefaultTestDsn
 	}
 
 	paymentCodeSuite := &paymentCodeTestSuite{
-		repository.Suite{
+		util.Suite{
 			DSN:                     dsn,
 			MigrationLocationFolder: "migrations",
 		},

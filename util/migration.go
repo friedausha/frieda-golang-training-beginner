@@ -1,4 +1,4 @@
-package repository
+package util
 
 import (
 	"database/sql"
@@ -8,11 +8,11 @@ import (
 	_postgres "github.com/golang-migrate/migrate/v4/database/postgres"
 )
 
-type migration struct {
+type Migration struct {
 	Migrate *migrate.Migrate
 }
 
-func (m *migration) Up() (bool, error) {
+func (m *Migration) Up() (bool, error) {
 	err := m.Migrate.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		return false, err
@@ -20,7 +20,7 @@ func (m *migration) Up() (bool, error) {
 	return true, nil
 }
 
-func (m *migration) Down() (bool, error) {
+func (m *Migration) Down() (bool, error) {
 	err := m.Migrate.Down()
 	if err != nil {
 		return false, err
@@ -28,7 +28,7 @@ func (m *migration) Down() (bool, error) {
 	return true, err
 }
 
-func runMigration(dbConn *sql.DB, migrationsFolderLocation string) (*migration, error) {
+func RunMigration(dbConn *sql.DB, migrationsFolderLocation string) (*Migration, error) {
 	dataPath := []string{}
 	dataPath = append(dataPath, "file://")
 	dataPath = append(dataPath, migrationsFolderLocation)
@@ -40,9 +40,9 @@ func runMigration(dbConn *sql.DB, migrationsFolderLocation string) (*migration, 
 		return nil, err
 	}
 
-	m, err := migrate.NewWithDatabaseInstance(pathToMigrate, migrationDbName, driver)
+	m, err := migrate.NewWithDatabaseInstance(pathToMigrate, MigrationDbName, driver)
 	if err != nil {
 		return nil, err
 	}
-	return &migration{Migrate: m}, nil
+	return &Migration{Migrate: m}, nil
 }
