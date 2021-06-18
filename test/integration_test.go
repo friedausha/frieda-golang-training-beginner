@@ -1,10 +1,15 @@
 package integration_test
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"frieda-golang-training-beginner/domain"
 	http2 "frieda-golang-training-beginner/payment_code/directory/http"
 	"frieda-golang-training-beginner/payment_code/repository"
 	"frieda-golang-training-beginner/payment_code/usecase"
 	"frieda-golang-training-beginner/util"
+	"github.com/google/uuid"
 	"github.com/labstack/echo"
 	"github.com/stretchr/testify/suite"
 	"io"
@@ -91,5 +96,60 @@ func (s paymentCodeTestSuite) TestCreate() {
 
 		})
 	}
+}
 
+func (s paymentCodeTestSuite) TestGet()  {
+	IDstr := "f3c3f48e-41e6-40e1-afe3-95ab9529c769"
+	var uuidReq [16]byte
+	copy(uuidReq[:], IDstr)
+
+	paymentCode := domain.PaymentCode{
+		ID:          uuidReq,
+		PaymentCode: "1",
+		Name:        "Fr",
+		Status:      "ACTIVE",
+	}
+
+	testCases := []struct {
+		desc               string
+		ID                        string
+		statusCodeExpected        int
+		returnPaymentCodeExpected domain.GetPaymentCodeResponsePayload
+	}{
+		{
+			desc: "success-get-payment-codes",
+			ID: IDstr,
+			statusCodeExpected: http.StatusOK,
+			returnPaymentCodeExpected: domain.GetPaymentCodeResponsePayload{
+				ID:          uuidReq,
+				PaymentCode: "1",
+				Name:        "Fr",
+				Status:      "ACTIVE",
+			},
+		},
+		{
+			desc:               "not-found",
+			ID:                 uuid.New().String(),
+			statusCodeExpected: http.StatusOK,
+			returnPaymentCodeExpected: domain.GetPaymentCodeResponsePayload{},
+		},
+	}
+	for _, tC := range testCases {
+		s.T().Run(tC.desc, func(t *testing.T) {
+			repo := repository.NewPaymentCodeRepository(s.DBConn)
+			service := usecase.NewPaymentCodeUsecase(repo, 5)
+			repo.Create(context.TODO(), &paymentCode)
+			e := echo.New()
+
+			http2.NewPaymentCodeHandler(e, service)
+			req := httptest.NewRequest("GET", fmt.Sprintf("/payment-codes/%s", tC.ID), nil)
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			res, _ := json.Marshal(tC.returnPaymentCodeExpected)
+			s.Require().Equal(tC.statusCodeExpected, rec.Code)
+			s.Require().Equal(res, rec.Body.Bytes())
+
+		})
+	}
 }
