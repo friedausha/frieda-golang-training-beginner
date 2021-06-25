@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"frieda-golang-training-beginner/domain"
-	"frieda-golang-training-beginner/payment_code/repository"
 	"github.com/jinzhu/copier"
 	"time"
 )
@@ -14,7 +13,7 @@ type IPaymentCodeRepository interface {
 }
 
 type PaymentCodeUsecase struct {
-	PaymentCodeRepo repository.PaymentCodeRepository
+	PaymentCodeRepo IPaymentCodeRepository
 	ContextTimeout  time.Duration
 }
 
@@ -53,7 +52,7 @@ func (p PaymentCodeUsecase) Create(ctx context.Context, request domain.CreatePay
 	return paymentCode, nil
 }
 
-func NewPaymentCodeUsecase(p repository.PaymentCodeRepository, timeout time.Duration) PaymentCodeUsecase {
+func NewPaymentCodeUsecase(p IPaymentCodeRepository, timeout time.Duration) PaymentCodeUsecase {
 	return PaymentCodeUsecase{
 		PaymentCodeRepo: p,
 		ContextTimeout:  timeout,
