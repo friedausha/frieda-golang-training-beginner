@@ -28,6 +28,20 @@ func (_m *IPaymentCodeRepository) Create(ctx context.Context, paymentCode *domai
 	return r0
 }
 
+// Expire provides a mock function with given fields: ctx
+func (_m *IPaymentCodeRepository) Expire(ctx context.Context) error {
+	ret := _m.Called(ctx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetByID provides a mock function with given fields: ctx, uuid
 func (_m *IPaymentCodeRepository) GetByID(ctx context.Context, uuid string) (domain.PaymentCode, error) {
 	ret := _m.Called(ctx, uuid)

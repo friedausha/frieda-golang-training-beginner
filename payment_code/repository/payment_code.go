@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"frieda-golang-training-beginner/domain"
 	"github.com/google/uuid"
+	"time"
 )
 
 type PaymentCodeRepository struct {
@@ -80,7 +81,20 @@ func (p PaymentCodeRepository) Create(ctx context.Context, paymentCode *domain.P
 	}
 
 	return nil
+}
 
+func (p PaymentCodeRepository) Expire(ctx context.Context) error {
+	now := time.Now()
+	query := `UPDATE payment_codes SET status=$1, updated_at=$2 WHERE status='ACTIVE' and expiration_date <= $3`
+	stmt, err := p.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	_, err = stmt.ExecContext(ctx, "EXPIRED", now, now)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func NewPaymentCodeRepository(Conn *sql.DB) *PaymentCodeRepository {
