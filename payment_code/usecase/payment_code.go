@@ -3,8 +3,6 @@ package usecase
 import (
 	"context"
 	"frieda-golang-training-beginner/domain"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/jinzhu/copier"
 	"time"
 )
@@ -18,7 +16,6 @@ type IPaymentCodeRepository interface {
 type PaymentCodeUsecase struct {
 	PaymentCodeRepo IPaymentCodeRepository
 	ContextTimeout  time.Duration
-	sqs sqs.Publisher
 }
 
 func (p PaymentCodeUsecase) Get(ctx context.Context, uuid string) (domain.GetPaymentCodeResponsePayload, error) {

@@ -19,7 +19,7 @@ type InquiryHandler struct {
 	inquiryUsecase IInquiryUsecase
 }
 
-func NewPaymentCodeHandler(e *echo.Echo, us IInquiryUsecase) {
+func NewInquiryHandler(e *echo.Echo, us IInquiryUsecase) {
 	handler := &InquiryHandler{
 		inquiryUsecase: us,
 	}

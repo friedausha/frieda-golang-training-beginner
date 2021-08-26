@@ -2,21 +2,26 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"frieda-golang-training-beginner/aws"
 	"frieda-golang-training-beginner/domain"
 	"frieda-golang-training-beginner/inquiry/usecase"
 	"github.com/google/uuid"
+	"os"
 	"time"
 )
 
+var QueueUrl = os.Getenv("SQS_QUEUE_URL")
 type IPaymentRepository interface {
 	Create(ctx context.Context, payment *domain.Payment) error
 }
 
 type PaymentUsecase struct {
-	PaymentRepo IPaymentRepository
+	PaymentRepo    IPaymentRepository
 	InquiryUsecase usecase.InquiryUsecase
-	ContextTimeout  time.Duration
+	SQS            aws.SQS
+	ContextTimeout time.Duration
 }
 
 func (p PaymentUsecase) Create(ctx context.Context, request domain.CreatePaymentRequestPayload) (domain.Payment, error) {
@@ -38,7 +43,18 @@ func (p PaymentUsecase) Create(ctx context.Context, request domain.CreatePayment
 		return domain.Payment{}, fmt.Errorf("hasn't created inquiry")
 	}
 
+	paymentStr, err := json.Marshal(payment)
+
 	err = p.PaymentRepo.Create(ctx, &payment)
+	if err != nil {
+		return domain.Payment{}, err
+	}
+	message := domain.SendRequest{
+		Body:     string(paymentStr),
+		QueueURL: QueueUrl,
+	}
+
+	_, err = p.SQS.Send(ctx, &message)
 	if err != nil {
 		return domain.Payment{}, err
 	}
@@ -46,10 +62,12 @@ func (p PaymentUsecase) Create(ctx context.Context, request domain.CreatePayment
 	return payment, nil
 }
 
-func NewPaymentUsecase(p IPaymentRepository, i usecase.InquiryUsecase, timeout time.Duration) PaymentUsecase {
+func NewPaymentUsecase(p IPaymentRepository, i usecase.InquiryUsecase, sqs aws.SQS,
+	timeout time.Duration) PaymentUsecase {
 	return PaymentUsecase{
-		PaymentRepo: p,
+		PaymentRepo:    p,
 		InquiryUsecase: i,
-		ContextTimeout:  timeout,
+		SQS:            sqs,
+		ContextTimeout: timeout,
 	}
 }

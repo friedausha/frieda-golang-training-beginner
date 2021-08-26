@@ -72,8 +72,7 @@ func (m InquiryRepository) Create(ctx context.Context, inquiry *domain.Inquiry) 
 		return err
 	}
 
-	_, err = stmt.ExecContext(ctx, inquiry.ID, inquiry.PaymentCode, inquiry.TransactionID,
-		inquiry.CreatedAt, inquiry.UpdatedAt)
+	_, err = stmt.ExecContext(ctx, inquiry.ID, inquiry.PaymentCode, inquiry.TransactionID)
 	if err != nil {
 		return err
 	}
