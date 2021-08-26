@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+
 type IPaymentCodeRepository interface {
 	GetByID(ctx context.Context, uuid string) (domain.PaymentCode, error)
 	Create(ctx context.Context, paymentCode *domain.PaymentCode) error

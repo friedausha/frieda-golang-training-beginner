@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/Kount/pq-timeouts v1.0.0
 	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/aws/aws-sdk-go v1.17.7
 	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/creack/pty v1.1.13 // indirect
 	github.com/dhui/dktest v0.3.4 // indirect
