@@ -2,6 +2,7 @@ package repository_test
 
 import (
 	"context"
+	"fmt"
 	"frieda-golang-training-beginner/domain"
 	"frieda-golang-training-beginner/payment_code/repository"
 	"frieda-golang-training-beginner/util"
@@ -53,6 +54,7 @@ func createMockPaymentCodes() *domain.PaymentCode {
 		ID:     uuid.UUID{},
 		Name:   "Test",
 		Status: "ACTIVE",
+		ExpirationDate: time.Unix(1621792756, 1000) ,
 	}
 }
 
@@ -134,6 +136,39 @@ func (s paymentCodeTestSuite) TestGetByID() {
 			if inserted != (domain.PaymentCode{}) {
 				s.Require().Equal(paymentCode.Name, inserted.Name)
 				s.Require().Equal(paymentCode.Status, inserted.Status)
+			}
+		})
+	}
+
+}
+
+func (s paymentCodeTestSuite) TestExpire() {
+	repo := repository.NewPaymentCodeRepository(s.DBConn)
+	paymentCode := createMockPaymentCodes()
+
+	testCases := []struct {
+		desc           string
+		expectedErr    error
+		expectedStatus string
+	}{
+		{
+			desc:           "success-expire",
+			expectedErr:    nil,
+			expectedStatus: "EXPIRED",
+		},
+	}
+
+	for _, tC := range testCases {
+		s.T().Run(tC.desc, func(t *testing.T) {
+
+			_ = repo.Create(context.TODO(), paymentCode)
+			err := repo.Expire(context.TODO())
+			inserted, err := repo.GetByID(context.TODO(), paymentCode.ID.String())
+			fmt.Println(inserted)
+			s.Require().NoError(err)
+			if inserted != (domain.PaymentCode{}) {
+				s.Require().Equal(paymentCode.Name, inserted.Name)
+				s.Require().Equal("EXPIRED", inserted.Status)
 			}
 		})
 	}
