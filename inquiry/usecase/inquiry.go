@@ -13,8 +13,8 @@ type IInquiryRepository interface {
 }
 
 type InquiryUsecase struct {
-	InquiryRepo IInquiryRepository
-	ContextTimeout  time.Duration
+	InquiryRepo    IInquiryRepository
+	ContextTimeout time.Duration
 }
 
 func (p InquiryUsecase) Get(ctx context.Context, transactionID string) (domain.Inquiry, error) {
@@ -48,7 +48,7 @@ func (p InquiryUsecase) Create(ctx context.Context, request domain.CreateInquiry
 
 func NewInquiryUsecase(p IInquiryRepository, timeout time.Duration) InquiryUsecase {
 	return InquiryUsecase{
-		InquiryRepo: p,
-		ContextTimeout:  timeout,
+		InquiryRepo:    p,
+		ContextTimeout: timeout,
 	}
 }

@@ -1,4 +1,3 @@
-BEGIN ;
 CREATE TABLE IF NOT EXISTS payment (
    id uuid PRIMARY KEY,
    transaction_id text NOT NULL,
@@ -8,4 +7,3 @@ CREATE TABLE IF NOT EXISTS payment (
    created_at timestamptz NOT NULL DEFAULT NOW(),
    updated_at timestamptz NOT NULL DEFAULT NOW()
 );
-COMMIT ;
