@@ -24,7 +24,9 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/moby/term v0.0.0-20210610120745-9d4ed1856297 // indirect
+	github.com/robfig/cron v1.2.0
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	github.com/spf13/viper v1.8.1
 	github.com/stretchr/objx v0.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/valyala/fasttemplate v1.2.1 // indirect
@@ -34,5 +36,4 @@ require (
 	golang.org/x/time v0.0.0-20210611083556-38a9dc6acbc6 // indirect
 	google.golang.org/genproto v0.0.0-20210614182748-5b3b54cad159 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

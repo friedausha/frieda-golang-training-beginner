@@ -93,3 +93,29 @@ func TestGetPaymentCode(t *testing.T) {
 		})
 	}
 }
+
+func TestExpire(t *testing.T) {
+	testCases := []struct {
+		desc          string
+		mockRepo      mocks.IPaymentCodeRepository
+		expectedError error
+	}{
+		{
+			desc: "success",
+			mockRepo: func() mocks.IPaymentCodeRepository {
+				repo := new(mocks.IPaymentCodeRepository)
+				repo.On("Expire", mock.Anything, mock.Anything).Return(nil).Once()
+				return *repo
+			}(),
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			t.Run(tC.desc, func(t *testing.T) {
+				service := usecase.NewPaymentCodeUsecase(&tC.mockRepo, 5)
+				err := service.Expire(context.TODO())
+				require.Equal(t, tC.expectedError, err)
+			})
+		})
+	}
+}

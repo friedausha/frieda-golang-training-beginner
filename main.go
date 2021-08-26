@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"frieda-golang-training-beginner/aws"
 	_healthUsecase "frieda-golang-training-beginner/health/usecase"
 	_helloWorldUsecase "frieda-golang-training-beginner/hello-world/usecase"
+	"frieda-golang-training-beginner/util"
 	"frieda-golang-training-beginner/inquiry/directory/http"
 	repository2 "frieda-golang-training-beginner/inquiry/repository"
 	"frieda-golang-training-beginner/inquiry/usecase"
@@ -22,17 +24,9 @@ import (
 	_paymentCodeUsecase "frieda-golang-training-beginner/payment_code/usecase"
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
+	"github.com/robfig/cron"
 	"time"
 )
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "frieda"
-	password = "namamu"
-	dbname   = "golang_training"
-)
-
 
 func main() {
 	e := echo.New()
@@ -47,6 +41,16 @@ func main() {
 	paymentCodeRepository := repository.PaymentCodeRepository{Conn: db}
 	paymentCodeUsecase := _paymentCodeUsecase.PaymentCodeUsecase{PaymentCodeRepo: paymentCodeRepository, ContextTimeout: time.Duration(100000000)}
 	_paymentCodeHttpDirectory.NewPaymentCodeHandler(e, paymentCodeUsecase)
+
+	cr := cron.New()
+	_ = cr.AddFunc("*/1 * * * *", func() {
+		err := paymentCodeUsecase.Expire(context.Background())
+		if err != nil {
+			log.Error(err)
+		}
+	},
+	)
+	cr.Start()
 
 	inquiryRepository := repository2.InquiryRepository{Conn: db}
 	inquiryUsecase := usecase.InquiryUsecase{InquiryRepo: inquiryRepository, ContextTimeout: time.Duration(1000000000)}
@@ -78,9 +82,15 @@ func main() {
 }
 
 func initDB() *sql.DB {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+	postgresHost := util.MustHaveEnv("POSTGRES_HOST")
+	postgresPort := util.MustHaveEnv("POSTGRES_PORT")
+	postgresUser := util.MustHaveEnv("POSTGRES_USER")
+	postgresPassword := util.MustHaveEnv("POSTGRES_PASSWORD")
+	postgresDbname := util.MustHaveEnv("POSTGRES_DB")
+
+	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+		postgresHost, postgresPort, postgresUser, postgresPassword, postgresDbname)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {

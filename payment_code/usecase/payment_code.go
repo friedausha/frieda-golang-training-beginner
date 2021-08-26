@@ -11,6 +11,7 @@ import (
 type IPaymentCodeRepository interface {
 	GetByID(ctx context.Context, uuid string) (domain.PaymentCode, error)
 	Create(ctx context.Context, paymentCode *domain.PaymentCode) error
+	Expire(ctx context.Context) error
 }
 
 type PaymentCodeUsecase struct {
@@ -51,6 +52,14 @@ func (p PaymentCodeUsecase) Create(ctx context.Context, request domain.CreatePay
 		return domain.PaymentCode{}, err
 	}
 	return paymentCode, nil
+}
+
+func (p PaymentCodeUsecase) Expire(ctx context.Context) error {
+	err := p.PaymentCodeRepo.Expire(ctx)
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 func NewPaymentCodeUsecase(p IPaymentCodeRepository, timeout time.Duration) PaymentCodeUsecase {
